@@ -1,2 +1,2 @@
 #!/bin/bash
-chmod +x /home/ec2-user/myapp/scripts/*.sh
+chmod +x /home/ec2-user/flaskapp/scripts/*.sh
