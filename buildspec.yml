@@ -1,23 +1,31 @@
 version: 0.2
 
+env:
+  variables:
+    IMAGE_TAG: "latest"
+    ECR_REPO: "648908580279.dkr.ecr.ap-south-1.amazonaws.com/devenvmanual"
+
 phases:
   pre_build:
     commands:
-      - echo Logging into Amazon ECR...
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 337909742643.dkr.ecr.ap-south-1.amazonaws.com
-      - REPO=337909742643.dkr.ecr.ap-south-1.amazonaws.com/my-web-app
-      - TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-
+      - echo "Logging into Amazon ECR..."
+      - aws --version
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 648908580279.dkr.ecr.ap-south-1.amazonaws.com
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
     commands:
-      - echo Build started...
-      - docker build -t $REPO:$TAG .
-      - docker tag $REPO:$TAG $REPO:latest
-
+      - echo "Building the Docker image..."
+      - docker build -t $ECR_REPO:$IMAGE_TAG .
   post_build:
     commands:
-      - docker push $REPO:$TAG
-      - docker push $REPO:latest
+      - echo "Pushing the Docker image to ECR..."
+      - docker push $ECR_REPO:$IMAGE_TAG
+      - echo "Generating imagedefinitions.json for CodeDeploy..."
+      - printf '[{"name":"flaskapp","imageUri":"%s"}]' $ECR_REPO:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
-  files: '**/*'
+  files:
+    - appspec.yml
+    - scripts/*
+    - imagedefinitions.json
