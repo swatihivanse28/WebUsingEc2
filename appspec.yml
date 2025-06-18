@@ -1,8 +1,9 @@
 version: 0.0
 os: linux
+
 files:
   - source: scripts/
-    destination: /home/ec2-user/scripts/
+    destination: /home/ec2-user/myapp/scripts/
 
 hooks:
   ApplicationStop:
@@ -11,6 +12,10 @@ hooks:
       runas: ec2-user
 
   BeforeInstall:
+    - location: scripts/make_executable.sh
+      timeout: 60
+      runas: ec2-user
+
     - location: scripts/install_dependencies.sh
       timeout: 300
       runas: ec2-user
