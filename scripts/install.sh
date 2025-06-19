@@ -1,3 +1,3 @@
 #!/bin/bash
-cd /home/ec2-user/Web-Application-Deploy
+cd /home/ec2-user/WebUsingEc2
 pip3 install -r requirements.txt
